@@ -26,7 +26,7 @@ export async function main(args) {
     user.email = args.email;
     user.password = await hashPassword(args.password);
     user.activated = false;
-    user.datelastlogin = new Date().toLocaleDateString();
+    user.datelastlogin = new Date();
     user.fullname = args.fullname;
     user.address = args.address;
     user.phonenumber= args.phonenumber;

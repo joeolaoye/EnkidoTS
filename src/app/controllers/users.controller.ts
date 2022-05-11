@@ -1,4 +1,4 @@
-import { Context, Delete, Get, hashPassword, HttpResponseCreated, HttpResponseNoContent, HttpResponseNotFound, HttpResponseOK, Post, ValidateBody, ValidatePathParam, ValidateQueryParam } from '@foal/core';
+import { Context, Delete, Get, hashPassword, HttpResponseBadRequest, HttpResponseCreated, HttpResponseNoContent, HttpResponseNotFound, HttpResponseOK, Post, ValidateBody, ValidatePathParam, ValidateQueryParam } from '@foal/core';
 import { User } from '../entities';
 
 export class UsersController {
@@ -9,8 +9,8 @@ export class UsersController {
       email: { type: 'string' },
       password: { type: 'string' },
       fullname: { type: 'string' },
-      address: {type: 'string'},
-      phonenumber: {type: 'integer'}
+      address: { type: 'string' },
+      phonenumber: { type: 'integer' }
     },
     required: ['email', 'password', 'fullname'],
     type: 'object'
@@ -53,18 +53,23 @@ export class UsersController {
   @ValidateBody(controller => controller.schema)
   async postUser(ctx: Context) {
 
-    const user = new User();
-    user.email = ctx.request.body.email;
-    user.password = await hashPassword(ctx.request.body.password);
-    user.activated = false;
-    user.datelastlogin = new Date().toLocaleDateString();
-    user.fullname = ctx.request.body.fullname;
-    user.address = ctx.request.body.address;
-    user.phonenumber = ctx.request.body.phonenumber;
+    const exists = await User.findOne({ email: ctx.request.body.email });
+    if (exists) {
+      return new HttpResponseBadRequest('User already registered');
+    }
+    else {
+      const user = new User();
+      user.email = ctx.request.body.email;
+      user.password = await hashPassword(ctx.request.body.password);
+      user.activated = false;
+      user.datelastlogin = new Date().toLocaleDateString();
+      user.fullname = ctx.request.body.fullname;
+      user.address = ctx.request.body.address;
+      user.phonenumber = ctx.request.body.phonenumber;
 
-    await User.save(user);
-    return new HttpResponseCreated(user);
-
+      await User.save(user);
+      return new HttpResponseCreated(user);
+    }
   }
 
   @Delete('/:id')
