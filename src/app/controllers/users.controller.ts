@@ -1,4 +1,4 @@
-import { Context, Get, HttpResponseOK, ValidatePathParam, ValidateQueryParam } from '@foal/core';
+import { Context, Get, HttpResponseNotFound, HttpResponseOK, ValidatePathParam, ValidateQueryParam } from '@foal/core';
 import { User } from '../entities';
 
 export class UsersController {
@@ -26,13 +26,14 @@ export class UsersController {
   @Get('/:id')
   @ValidatePathParam('id', { type: 'number' })
   async getUserByID(ctx: Context) {
-    const id = ctx.request.path;
-    
-
-    const queryBuilder = User.createQueryBuilder('users')
-      .select();
-    const users = await queryBuilder.getMany();
-    return new HttpResponseOK(users);
+    const id = ctx.request.params.id;
+    const user = await User.findOne({ id: id });
+    if (!user) {
+      return new HttpResponseNotFound();
+    }
+    else {
+      return new HttpResponseOK(user);
+    }
   }
 
 }
