@@ -1,7 +1,20 @@
-import { Context, Get, HttpResponseNotFound, HttpResponseOK, ValidatePathParam, ValidateQueryParam } from '@foal/core';
+import { Context, Get, hashPassword, HttpResponseCreated, HttpResponseNotFound, HttpResponseOK, Post, ValidateBody, ValidatePathParam, ValidateQueryParam } from '@foal/core';
 import { User } from '../entities';
 
 export class UsersController {
+
+  schema = {
+    additionalProperties: false,
+    properties: {
+      email: { type: 'string' },
+      password: { type: 'string' },
+      fullname: { type: 'string' },
+      address: {type: 'string'},
+      phonenumber: {type: 'integer'}
+    },
+    required: ['email', 'password', 'fullname'],
+    type: 'object'
+  };
 
   @Get('/')
   @ValidateQueryParam('page', { type: 'number' }, { required: false })
@@ -36,4 +49,24 @@ export class UsersController {
     }
   }
 
+  @Post('/')
+  @ValidateBody(controller => controller.schema)
+  async postUser(ctx: Context) {
+
+    const user = new User();
+    user.email = ctx.request.body.email;
+    user.password = await hashPassword(ctx.request.body.password);
+    user.activated = false;
+    user.datelastlogin = new Date().toLocaleDateString();
+    user.fullname = ctx.request.body.fullname;
+    user.address = ctx.request.body.address;
+    user.phonenumber = ctx.request.body.phonenumber;
+
+    await User.save(user);
+    return new HttpResponseCreated(user);
+
+  }
 }
+
+
+
