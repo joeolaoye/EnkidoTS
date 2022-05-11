@@ -1,4 +1,4 @@
-import { Context, Get, hashPassword, HttpResponseCreated, HttpResponseNotFound, HttpResponseOK, Post, ValidateBody, ValidatePathParam, ValidateQueryParam } from '@foal/core';
+import { Context, Delete, Get, hashPassword, HttpResponseCreated, HttpResponseNoContent, HttpResponseNotFound, HttpResponseOK, Post, ValidateBody, ValidatePathParam, ValidateQueryParam } from '@foal/core';
 import { User } from '../entities';
 
 export class UsersController {
@@ -65,6 +65,20 @@ export class UsersController {
     await User.save(user);
     return new HttpResponseCreated(user);
 
+  }
+
+  @Delete('/:id')
+  async deleteTodo(ctx: Context) {
+
+    const user = await User.findOne({ id: ctx.request.params.id });
+
+    if (!user) {
+      return new HttpResponseNotFound();
+    }
+
+    await user.softRemove();
+
+    return new HttpResponseNoContent();
   }
 }
 
