@@ -25,6 +25,12 @@ export class User extends BaseEntity {
   @Column()
   activated: boolean;
 
+  @Column()
+  twofa: boolean;
+
+  @Column({ nullable: true })
+  twofacode: number;
+
   @CreateDateColumn()
   datecreated;
 
