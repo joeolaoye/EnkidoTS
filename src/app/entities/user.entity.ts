@@ -31,6 +31,9 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   twofacode: number;
 
+  @Column({ nullable: true })
+  activationcode: number;
+
   @CreateDateColumn()
   datecreated;
 
